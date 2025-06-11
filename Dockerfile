@@ -1,6 +1,9 @@
 # Build stage
 FROM golang:1.23-bullseye AS builder
 
+# Set GOTOOLCHAIN to auto to allow Go to download required version
+ENV GOTOOLCHAIN=auto
+
 # Set the working directory
 WORKDIR /app
 
