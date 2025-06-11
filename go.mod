@@ -1,6 +1,6 @@
 module github.com/grafana/mcp-grafana
 
-go 1.23
+go 1.24.0
 
 require (
 	github.com/go-openapi/strfmt v0.23.0
