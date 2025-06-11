@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.24-bullseye AS builder
+FROM golang:1.23-bullseye AS builder
 
 # Set the working directory
 WORKDIR /app
@@ -12,6 +12,9 @@ RUN go mod download
 
 # Copy the source code
 COPY . .
+
+# Run go mod tidy to ensure dependencies are correct
+RUN go mod tidy
 
 # Build the application
 RUN go build -o mcp-grafana ./cmd/mcp-grafana
