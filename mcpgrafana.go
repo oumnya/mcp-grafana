@@ -141,17 +141,36 @@ var ExtractGrafanaClientFromHeaders server.SSEContextFunc = func(ctx context.Con
 	cfg := client.DefaultTransportConfig()
 	// Extract transport config from request headers, and set it on the context.
 	u, apiKey := urlAndAPIKeyFromHeaders(req)
+	uEnv, apiKeyEnv := urlAndAPIKeyFromEnv()
+	
+	// Fall back to environment variables if headers are empty
+	if u == "" {
+		u = uEnv
+	}
+	if u == "" {
+		u = defaultGrafanaURL
+	}
+	if apiKey == "" {
+		apiKey = apiKeyEnv
+	}
+	
+	// Parse and configure the URL
 	if u != "" {
-		if url, err := url.Parse(u); err == nil {
-			cfg.Host = url.Host
-			if url.Scheme == "http" {
+		if parsedURL, err := url.Parse(u); err == nil {
+			cfg.Host = parsedURL.Host
+			if parsedURL.Scheme == "http" {
 				cfg.Schemes = []string{"http"}
 			}
+			slog.Debug("Creating Grafana client", "url", parsedURL.Redacted(), "api_key_set", apiKey != "")
+		} else {
+			slog.Error("Failed to parse Grafana URL", "url", u, "error", err)
 		}
 	}
+	
 	if apiKey != "" {
 		cfg.APIKey = apiKey
 	}
+	
 	client := client.NewHTTPClientWithConfig(strfmt.Default, cfg)
 	return WithGrafanaClient(ctx, client)
 }
